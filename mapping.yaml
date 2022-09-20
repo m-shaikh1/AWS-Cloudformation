@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This is my Cloud Formation Mappings and Conditionals
+Mappings:
+  RegionWiseImageIds:
+    us-east-1:
+      Ubuntu22: ami-09d56f8956ab235b3
+      Ubuntu20: ami-0c4f7023847b90238
+    us-west-1:
+      Ubuntu22:  ami-0dc5e9ff792ec08e3 
+      Ubuntu20:  ami-0487b1fe60c1fd1a2
+Parameters:
+  ImageId:  
+    Type: String
+    Description:  This is a parameter to store img Id
+    Default:  ami-09d56f8956ab235b3
+  InstanceType:  
+    Type: String
+    Description:  This is a parameter for Instance Type
+    Default:  t2.micro
+  EnvironmentType:
+    Type:  String
+    Description: This defined the environment type
+    AllowedValues: [test,prod]
+Conditions:
+  CreateProResources: !Equals
+    - !Ref EnvironmentType
+    - prod
+Resources:  
+  WebserverEc2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId:  !FindInMap 
+        - RegionWiseImageIds
+        - !Ref AWS::Region 
+        - Ubuntu22
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds:
+        - Ref:  SecurityGroup
+      Tags: 
+        -
+          Key: Name
+          Value:  WebserverEc2Instance
+        -
+          Key:  Env
+          Value:  Dev
+  NewVolume:
+    Type: AWS::EC2::Volume
+    Condition: CreateProResources
+    Properties:
+      Size: 100
+      AvailabilityZone: !GetAtt WebserverEc2Instance.AvailabilityZone
+      Tags:
+        - Key: MyTag
+          Value: TagValue
+  MountPoint:
+    Type: AWS::EC2::VolumeAttachment
+    Condition: CreateProResources
+    Properties:
+      InstanceId: !Ref WebserverEc2Instance
+      VolumeId: !Ref NewVolume
+      Device: /dev/sdh
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow http to client host
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+#      SecurityGroupEgress:
+#       - IpProtocol: tcp
+#          FromPort: 80
+#          ToPort: 80
+#          CidrIp: 0.0.0.0/0

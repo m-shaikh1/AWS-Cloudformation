@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Database stack template for AWS 
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          default: Database Instance Settings 
+        Parameters:
+          - AllocatedStorage
+          - DbClass 
+      - 
+        Label:
+          default: Network Settings
+        Parameters:
+          - NetworkStackName 
+
+Parameters:  
+  NetworkStackName:
+    Type: String
+    Description: This is the name of the network stack
+    Default:  Network
+  AllocatedStorage:
+    Type: Number
+    Description: Database storage in GiB
+    MinValue: 8 
+    MaxValue: 20
+    Default: 8
+
+  DbClass:
+    Type: String 
+    AllowedValues: [ db.t2.micro, db.t2.small ]
+    Description: Amazon RDS DB instance class
+    Default: db.t2.micro
+
+Resources:
+  DbSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: The subnets to launch the db instance into.
+      SubnetIds: !Split
+        - ","
+        - !ImportValue
+          Fn::Sub: '${NetworkStackName}-PrivateSubnet'
+
+  DbInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: !Ref DbClass
+      Engine: mysql
+      MultiAZ: false
+      AllocatedStorage: !Ref AllocatedStorage 
+      MasterUsername: dbadmin
+      MasterUserPassword: dbpassword
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups: 
+         - Fn::ImportValue: !Sub '${NetworkStackName}-DbSecurityGroup'

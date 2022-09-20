@@ -1,0 +1,10 @@
+{
+"name" : "Mohammed",
+"email" : "mohammed.y.shaikh1@gmail.com",
+"PhoneNumber" : [1566531,14651651],
+"address" : {
+    "addressType" : "home" ,
+    "houseNumber" : 15661 , 
+    "pincode" : 1488885
+ }
+}

@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This is my second Cloud Formation
+Parameters:
+  ImageId:  
+    Type: String
+    Description:  This is a parameter to store img Id
+    Default:  ami-09d56f8956ab235b3
+  InstanceType:  
+    Type: String
+    Description:  This is a parameter for Instance Type
+Resources:  
+  WebserverEc2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId:  !Ref ImageId
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds:
+        - Ref:  SecurityGroup
+      Tags: 
+        -
+          Key: Name
+          Value:  WebserverEc2Instance
+        -
+          Key:  Env
+          Value:  Dev
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: Allow http to client host
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+#      SecurityGroupEgress:
+#       - IpProtocol: tcp
+#          FromPort: 80
+#          ToPort: 80
+#          CidrIp: 0.0.0.0/0

@@ -1,0 +1,17 @@
+Parameters:
+  BucketNameParameter:
+    Type: String
+    Description: 'A bucket name to set.'
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+     BucketName: !Ref BucketNameParameter
+
+
+
+#     BucketName: !Join [ '-', [
+#        !Ref BucketNameParameter, 'dummy', 'suffix'
+#        ]
+#      ]
